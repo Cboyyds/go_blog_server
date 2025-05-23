@@ -1,27 +1,3 @@
-├── server
-├── api               (api层)
-├── assets            (静态资源包)
-├── config            (配置包)
-├── core              (核心文件)
-├── flag              (flag命令)
-├── global            (全局对象)
-├── initialize        (初始化)
-├── log               (日志文件)
-├── middleware        (中间件层)
-├── model             (模型层)
-│   ├── appTypes      (自定义类型)
-│   ├── database      (mysql结构体)
-│   ├── elasticsearch (es结构体)
-│   ├── other         (其他结构体)
-│   ├── request       (入参结构体)
-│   └── response      (出参结构体)
-├── router            (路由层)
-├── service           (service层)
-├── task              (定时任务包)
-├── uploads           (文件上传目录)
-└── utils             (工具包)
-├── hotSearch    (热搜接口封装)
-└── upload        (oss接口封装)
 [Go春绝迹-绝迹之春的个人博客](https://www.scc749.cn/)
 
 问题：
@@ -38,19 +14,19 @@ server_other.go
 
 ![image-20250424220452731](C:\Users\c博\AppData\Roaming\Typora\typora-user-images\image-20250424220452731.png)
 
-(
-`id` bigint unsigned NOT NULL AUTO_INCREMENT,
-`created_at` datetime(3) DEFAULT NULL,
-`updated_at` datetime(3) DEFAULT NULL,
-`deleted_at` datetime(3) DEFAULT NULL,
-`article_id` longtext,
-`p_id` bigint unsigned DEFAULT NULL,
-`user_uuid` char(36) DEFAULT NULL,
-`content` longtext,
-PRIMARY KEY (`id`),
-KEY `idx_comments_deleted_at` (`deleted_at`),
-KEY `fk_comments_children` (`p_id`),
-CONSTRAINT `fk_comments_children` FOREIGN KEY (`p_id`) REFERENCES `comments` (`id`)
+ (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `created_at` datetime(3) DEFAULT NULL,
+  `updated_at` datetime(3) DEFAULT NULL,
+  `deleted_at` datetime(3) DEFAULT NULL,
+  `article_id` longtext,
+  `p_id` bigint unsigned DEFAULT NULL,
+  `user_uuid` char(36) DEFAULT NULL,
+  `content` longtext,
+  PRIMARY KEY (`id`),
+  KEY `idx_comments_deleted_at` (`deleted_at`),
+  KEY `fk_comments_children` (`p_id`),
+  CONSTRAINT `fk_comments_children` FOREIGN KEY (`p_id`) REFERENCES `comments` (`id`)
 )
 
 ![image-20250425090946981](C:\Users\c博\AppData\Roaming\Typora\typora-user-images\image-20250425090946981.png)
@@ -263,6 +239,15 @@ func GinRecovery(stack bool) gin.HandlerFunc {
 如何将token发送给对应的前端，（如刚注册时，刚登录时，还有过期时等一些情况）
 
 ### 7.验证码部分
+
+验证码其实也是随机生成的，在utils/random.go里面
+
+```
+func GenerateVerificationCode(length int) string {
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
+	return fmt.Sprintf("%0*d", length, r.Intn(int(math.Pow10(length))))
+}
+```
 
 api/base.go
 
@@ -592,3 +577,5 @@ IP:=c.ClientIP()
 ![image-20250523095625587](C:\Users\c博\AppData\Roaming\Typora\typora-user-images\image-20250523095625587.png)
 
 在这里出现了一个小bug，因为本机跑在本地，ip地址为127.0.0.1，去进行请求定位信息请求不到，所以出现天气查询不到的情况了，其实高德的接口还可以只写一个key值也能请求到定位，
+
+### 12.core包里面有初始化应用于非window操作系统和window的服务器
